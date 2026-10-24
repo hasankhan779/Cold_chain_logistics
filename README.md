@@ -431,3 +431,75 @@ The implementation has been verified through targeted tests:
 
 ## 📜 License
 This project is developed as an AI Forward Deployed Engineering (FDE) operational reference implementation under the MIT License.
+
+---
+
+## 16. Example Questions Users Can Ask
+
+The assistant handles operational queries across multiple analytical categories:
+
+### 1. Specific Record Investigation
+- *"Check telemetry for Record ID 3727. What is the current cargo temperature, and what immediate actions does SOP v2.4 require?"*
+- *"Investigate Record ID 19400. Are there any port congestion issues along this route, and where should we divert the freight?"*
+
+### 2. Multi-Condition Escalation Evaluation
+- *"Does Record ID 15723 require escalation to the Tier 2 Logistics Manager? Check both risk classification and delay probability."*
+- *"Evaluate Record ID 1. Does the delay probability justify an escalation under our SOP?"*
+
+### 3. Fleet-Wide Anomaly Audits
+- *"Scan the fleet for active temperature breaches and list the top 3 critical shipments."*
+- *"Are there any vehicles currently experiencing port congestion above index 7.0?"*
+
+### 4. Direct SOP Knowledge Retrieval
+- *"What are the acceptable temperature thresholds for fresh perishables in SOP v2.4?"*
+- *"What is our exact protocol when port congestion exceeds 7.0 at the Port of Long Beach?"*
+
+---
+
+## 17. Testing and Validation
+
+The implementation has been verified through targeted tests:
+- **Database Ingestion Validation:** Confirmed via `LogisticsRepository.get_summary_metrics()`:
+  - Total records: `32,065`
+  - Active temperature breaches (>4.0°C): `8,674`
+  - Port congestion alerts (>7.0): `19,566`
+  - Tier 2 escalations: `15,440`
+- **Vector Retrieval Validation:** Tested in `src/rag/vector_store.py` with semantic queries, returning relevant chunks from `Cold_Chain_Incident_SOP_v2.md`.
+- **Weather API Sanity Check:** Verified in `tests/test_services.py` across sample GPS coordinates.
+- **End-to-End Agent Execution:** Verified in CLI tests executing complete multi-tool reasoning sequences.
+
+---
+
+## 18. Current Implementation Status and Remaining Tasks
+
+### ✅ Completed & Implemented
+- [x] Production modular `src/` directory layout.
+- [x] PostgreSQL database integration with SQLAlchemy ORM and connection pooling.
+- [x] Phase 1 batch ingestion streaming 32,065 records into `cold_chain_db`.
+- [x] Phase 2 SOP ingestion pipeline using local Hugging Face embeddings and Pinecone.
+- [x] Open-Meteo REST API client for coordinate-based weather lookups.
+- [x] LangGraph ReAct agent orchestration with tool nodes and conditional edges.
+- [x] Grounded FDE system prompts with strict brevity guardrails.
+- [x] Interactive Terminal CLI (`cli.py`).
+- [x] Streamlit operations dashboard with caching (`app.py`).
+
+### ⏳ Planned Enhancements (Remaining Roadmap)
+- [ ] **Streaming Agent Responses in Streamlit:** Upgrade UI from batch message delivery to token-by-token streaming using LangGraph's `.stream()` API.
+- [ ] **Automated Alert Webhooks:** Connect agent escalation decisions to email/Slack notifications (e.g., via SendGrid or Slack webhooks) when Tier 2 escalations trigger.
+- [ ] **Map Visualization:** Integrate Streamlit PyDeck or Folium maps to display real-time truck GPS pins color-coded by temperature breach severity.
+- [ ] **Comprehensive Unit Test Suite:** Expand `tests/` with mocks for Claude and Pinecone calls.
+
+---
+
+## 19. Limitations and Future Improvements
+
+- **Local Process Hosting:** Running the Streamlit server locally requires the host machine to remain active. A production deployment would benefit from containerization with Docker and hosting on an orchestration platform (e.g., AWS ECS or Kubernetes).
+- **Static Ingest vs. Real-Time Streaming:** The current system ingests historical CSV logs in batches. A future improvement would attach an MQTT or Kafka message broker to ingest streaming IoT sensor packets in real time.
+- **Single-Turn Model Context:** The agent currently maintains conversation history within session state; implementing LangGraph persistent checkpointers (e.g., `MemorySaver` or `PostgresSaver`) will enable persistent multi-session thread recovery.
+- **Model Rate Limits:** The solution relies on external Anthropic API rate limits. Implementing client-side retry logic and fallback models will improve resilience under heavy concurrent load.
+
+---
+
+## 📜 License
+This project is developed as an AI Forward Deployed Engineering (FDE) operational reference implementation under the MIT License.
+
